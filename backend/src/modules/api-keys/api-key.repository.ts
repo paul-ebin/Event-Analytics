@@ -30,3 +30,22 @@ export async function findApiKeysByProjectId(
 
   return result.rows;
 }
+
+
+
+export async function revokeApiKey(
+  projectId: string,
+  keyId: string
+) {
+  const result = await pool.query(
+    `UPDATE project_api_keys
+     SET revoked_at = NOW()
+     WHERE project_id = $1
+       AND id = $2
+       AND revoked_at IS NULL
+     RETURNING id, project_id, name, created_at, revoked_at`,
+    [projectId, keyId]
+  );
+
+  return result.rows[0] ?? null;
+}

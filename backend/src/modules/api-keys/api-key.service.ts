@@ -3,6 +3,7 @@ import { generateApiKey } from "../../utils/api-key.js";
 import {
   createApiKey as createApiKeyRepository,
   findApiKeysByProjectId,
+  revokeApiKey as revokeApiKeyRepository,
 } from "./api-key.repository.js";
 import pool from "../../config/db.js";
 
@@ -63,4 +64,32 @@ export async function getProjectApiKeys(
   }
 
   return findApiKeysByProjectId(projectId);
+}
+
+
+
+export async function revokeProjectApiKey(
+  projectId: string,
+  userId: string,
+  keyId: string
+) {
+  const ownsProject = await verifyProjectOwnership(
+    projectId,
+    userId
+  );
+
+  if (!ownsProject) {
+    throw new Error("PROJECT_NOT_FOUND");
+  }
+
+  const revokedKey = await revokeApiKeyRepository(
+    projectId,
+    keyId
+  );
+
+  if (!revokedKey) {
+    throw new Error("API_KEY_NOT_FOUND");
+  }
+
+  return revokedKey;
 }

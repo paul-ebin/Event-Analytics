@@ -4,6 +4,7 @@ import type { AuthRequest } from "../../middleware/auth.middleware.js";
 import {
   createProjectApiKey,
   getProjectApiKeys,
+  revokeProjectApiKey,
 } from "./api-key.service.js";
 
 export async function createApiKeyHandler(
@@ -103,3 +104,67 @@ export async function listApiKeysHandler(
     });
   }
 }
+
+
+export async function revokeApiKeyHandler(
+  req: AuthRequest,
+  res: Response
+) {
+  if (!req.userId) {
+    return res.status(401).json({
+      error: "Authentication required",
+    });
+  }
+
+  const projectId = req.params.projectId;
+  const keyId = req.params.keyId;
+
+  if (
+    typeof projectId !== "string" ||
+    !projectId.trim() ||
+    typeof keyId !== "string" ||
+    !keyId.trim()
+  ) {
+    return res.status(400).json({
+      error: "Invalid project ID or API key ID",
+    });
+  }
+
+  try {
+    const key = await revokeProjectApiKey(
+      projectId,
+      req.userId,
+      keyId
+    );
+
+    return res.status(200).json({
+      message: "API key revoked successfully",
+      key,
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "PROJECT_NOT_FOUND"
+    ) {
+      return res.status(404).json({
+        error: "Project not found",
+      });
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "API_KEY_NOT_FOUND"
+    ) {
+      return res.status(404).json({
+        error: "Active API key not found",
+      });
+    }
+
+    console.error("Revoke API key failed:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+}
+
