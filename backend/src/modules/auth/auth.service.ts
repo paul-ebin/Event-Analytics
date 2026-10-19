@@ -4,7 +4,8 @@ import type { RegisterInput , LoginInput } from "./auth.schema.js";
 import {
   findUserByEmail,
   createUser,
-  findUserByEmailForLogin
+  findUserByEmailForLogin,
+  findUserById
 } from "./auth.repostitory.js"
 import { generateAccessToken } from "../../utils/jwt.js";
 export async function registerUser(input: RegisterInput) {
@@ -51,4 +52,15 @@ export async function loginUser(input: LoginInput) {
     },
     accessToken,
   };
+}
+
+
+export async function getUserProfile(userId: string) {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  return user;
 }

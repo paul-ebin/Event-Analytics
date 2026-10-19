@@ -39,3 +39,16 @@ export async function findUserByEmailForLogin(email: string) {
 
   return result.rows[0] ?? null;
 }
+
+
+export async function findUserById(userId: string) {
+  const result = await pool.query(
+    `SELECT id, email, created_at
+     FROM users
+     WHERE id = $1
+     LIMIT 1`,
+    [userId]
+  );
+
+  return result.rows[0] ?? null;
+}
