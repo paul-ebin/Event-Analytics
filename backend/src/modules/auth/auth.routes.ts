@@ -1,0 +1,13 @@
+
+import { Router } from "express";
+import { register , login , } from "./auth.controller.js";
+import { requireAuth } from "../../middleware/auth.middleware.js";
+import { getMe } from "./auth.me.controller.js";
+const router = Router();
+
+router.post("/register", register);
+router.post("/login", login);
+router.post("/me" ,requireAuth, getMe);
+
+
+export default router;
